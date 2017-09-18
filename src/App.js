@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import './App.css';
 
-const DEFAULT_QUERY = 'redux';
+const DEFAULT_QUERY = 'borzoi';
 const PATH_BASE = 'https://dog.ceo/api/';
-const PATH_SEARCH = '/search';
-const PARAM_SEARCH = 'query=';
+const PATH_SEARCH = 'breed/';
 
 const all_breed = 'breeds/list/all';
-const one_breed = 'breed/{breed name}/images';
+const PATH_END = '/images/random';
 
-const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+const url = `${PATH_BASE}${PATH_SEARCH}${DEFAULT_QUERY}${PATH_END}`;
+
+console.log(PATH_BASE + 'breeds/image/random');
+
 
 const user =  {
   firstname: 'Robin',
@@ -42,30 +44,39 @@ class App extends Component {
     super(props);
 
     this.state = {
-      result: null,
-      searchTerm: DEFAULT_QUERY,
+      imageUrl: null,
+      breed: DEFAULT_QUERY
     };
 
-    this.setSearchTopstories = this.setSearchTopstories.bind(this); 
-    this.fetchSearchTopstories = this.fetchSearchTopstories.bind(this);
+    this.fetchDogImage = this.fetchDogImage.bind(this); 
+    this.fetchDogs = this.fetchDogs.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
   }
 
-  setSearchTopstories(result) {
-    this.setState({ result });
+  setDogBreed(result){
+    this.setState({ breed: result[Math.floor((Math.random() * result.length) + 1)] });  
   }
 
-  fetchSearchTopstories(searchTerm) {
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+  fetchDogImage(breed) {
+    fetch('https://dog.ceo/api/breed/'+ breed +'/images/random')
       .then(response => response.json())
-      .then(result => this.setSearchTopstories(result))
+      .then(result => {
+        this.setState({imageUrl: result.message}); 
+      })
+  }  
+
+  fetchDogs(){
+    fetch('https://dog.ceo/api/breeds/list')
+      .then(response => response.json())
+      .then(breed => this.setDogBreed(breed.message))
+      .then(imageUrl => this.fetchDogImage(this.state.breed))
       .catch(e => e);
   }
+
   componentDidMount() {
-    const { searchTerm } = this.state;
-    this.fetchSearchTopstories(searchTerm);
+    this.fetchDogs();
   }
 
   onSearchSubmit(event) {
@@ -85,70 +96,28 @@ class App extends Component {
     this.setState({ searchTerm: event.target.value });
   }
 
+  proposeDog(bred){
+
+  }
+
   render() {
-    const { searchTerm, result } = this.state;
-    
+    const { breed, imageUrl } = this.state;
     return (
       <div className="page">
         <div className="interactions">
-          <Search 
-            value={searchTerm}
-            onChange={this.onSearchChange}
-            onSubmit={this.onSearchSubmit}
-          >
-            Search  
-          </Search>
+          <img src={imageUrl} alt="fetching doggo"/>
+          <h2>{breed}</h2>
         </div>
-        { result &&
-          <Table 
-            list={result.hits}
-            onDismiss={this.onDismiss}
-          />
-        }       
+        {/* <Button
+            onClick={() => proposeDog()}
+            className="button-inline"
+          >
+          Dismiss
+        </Button> */}
       </div>
     );
   }
 }
-
-const Search = ({
-  value,
-  onChange,
-  onSubmit,
-  children
-}) =>
-  <form onSubmit={onSubmit}>
-    <input
-      type="text"
-      value={value}
-      onChange={onChange}
-    />
-    <button type="submit">
-      {children}
-    </button>
-</form>
-
-
-const Table = ({list, onDismiss }) =>
-  <div className="table">
-    { list.map(item =>
-      <div key={item.objectID} className="table-row">
-        <span style={{ width: '40%'}}>
-          <a href={item.url}>{item.title}</a>
-        </span>
-        <span style={{ width: '30%'}}>{item.author}</span>
-        <span style={{ width: '10%'}}>{item.num_comments}</span>
-        <span style={{ width: '10%'}}>{item.points}</span>
-        <span style={{ width: '10%'}}>
-          <Button
-            onClick={() => onDismiss(item.objectID)}
-            className="button-inline"
-          >
-          Dismiss
-          </Button>
-        </span>
-    </div>
-    )}
-  </div>
 
 const Button = ({onClick, className = '', children}) =>
   <button
@@ -156,7 +125,6 @@ const Button = ({onClick, className = '', children}) =>
     className={className}
     type="button"
   >
-  {children}
   </button>
 
 
