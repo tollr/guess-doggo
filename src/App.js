@@ -10,49 +10,21 @@ const PATH_END = '/images/random';
 
 const url = `${PATH_BASE}${PATH_SEARCH}${DEFAULT_QUERY}${PATH_END}`;
 
-console.log(PATH_BASE + 'breeds/image/random');
-
-
-const user =  {
-  firstname: 'Robin',
-  lastname: 'Wieruch'
-}
-
-const users = ['darwin', 'jean-jacques', 'riton'];
-
-const [
-  userOne,
-  userTwo,
-  userThree
-] = users;
-
-// ES6 Syntax, define two variables 
-const {
-  firstname,
-  lastname 
-} = user;
-
-function isSearched(searchTerm) {
-  return function(item) {
-    return !searchTerm ||
-      item.title.toLowerCase().includes(searchTerm.toLowerCase());
-  }
-}
-
 class App extends Component {
   constructor(props){
     super(props);
 
     this.state = {
-      imageUrl: null,
-      breed: DEFAULT_QUERY
+      imageUrl: '',
+      breed: DEFAULT_QUERY,
+      proposal: '', 
+      result: '',
     };
 
     this.fetchDogImage = this.fetchDogImage.bind(this); 
     this.fetchDogs = this.fetchDogs.bind(this);
-    this.onSearchChange = this.onSearchChange.bind(this);
-    this.onSearchSubmit = this.onSearchSubmit.bind(this);
-    this.onDismiss = this.onDismiss.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.onProposalChange = this.onProposalChange.bind(this);    
   }
 
   setDogBreed(result){
@@ -73,51 +45,63 @@ class App extends Component {
       .then(breed => this.setDogBreed(breed.message))
       .then(imageUrl => this.fetchDogImage(this.state.breed))
       .catch(e => e);
-  }
+    }
 
   componentDidMount() {
     this.fetchDogs();
   }
 
-  onSearchSubmit(event) {
-    const { searchTerm } = this.state;
-    this.fetchSearchTopstories(searchTerm);
+  onSubmit(event) {
+    let result = (this.state.proposal === this.state.breed ? 'U got it' : 'No this doggo is a ' + this.state.breed + ' nice try though');
+    this.setState({ result: result});
     event.preventDefault();
+
+    setTimeout(function(){ window.location.reload(); }, 1000);
   }
 
-  onDismiss(id){
-    const isNotId = item => item.objectID !== id;
-    const updatedHits = this.state.result.hits.filter(isNotId); this.setState({
-      result: { ...this.state.result, hits: updatedHits } 
-    });
-  }
-
-  onSearchChange(event) {
-    this.setState({ searchTerm: event.target.value });
-  }
-
-  proposeDog(bred){
-
+  onProposalChange(event) {
+    this.setState({ proposal: event.target.value });
   }
 
   render() {
-    const { breed, imageUrl } = this.state;
+    const { breed, imageUrl, result } = this.state;
     return (
       <div className="page">
         <div className="interactions">
+          <h1>Guess Doggo</h1>
           <img src={imageUrl} alt="fetching doggo"/>
-          <h2>{breed}</h2>
-        </div>
-        {/* <Button
-            onClick={() => proposeDog()}
-            className="button-inline"
+
+          { result && <h2>{result}</h2> }
+
+          <Submit 
+            value="What's this good doggo's breed ?"
+            onSubmit={this.onSubmit}
+            onChange={this.onProposalChange}
           >
-          Dismiss
-        </Button> */}
+            Search  
+          </Submit>
+        </div>
       </div>
     );
   }
 }
+
+const Submit = ({
+  value,
+  onChange,
+  onSubmit,
+  children
+}) =>
+  <form onSubmit={onSubmit}>
+    <input
+      type="text"
+      placeholder={value}
+      onChange={onChange}
+    />
+    <button type="submit">
+      {children}
+    </button>
+</form>
 
 const Button = ({onClick, className = '', children}) =>
   <button
@@ -126,6 +110,5 @@ const Button = ({onClick, className = '', children}) =>
     type="button"
   >
   </button>
-
 
 export default App;

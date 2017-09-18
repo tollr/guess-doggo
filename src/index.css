@@ -15,7 +15,8 @@ ul, li {
   margin: 0;
 }
 input {
-  padding: 10px;
+  padding: 10px 20px;
+  width: 180px;
   border-radius: 5px;
   outline: none;
   margin-right: 10px;
