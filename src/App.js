@@ -22,11 +22,18 @@ class App extends Component {
       clue:'',
     };
 
+    this.baseState = this.state
+
+    this.resetGame = this.resetGame.bind(this);    
     this.fetchDogImage = this.fetchDogImage.bind(this); 
     this.fetchDogs = this.fetchDogs.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.onProposalChange = this.onProposalChange.bind(this);    
     this.getClue = this.getClue.bind(this);    
+  }
+
+  resetGame = () => {
+    this.setState(this.baseState)
   }
 
   setDogBreed(result){
@@ -44,11 +51,13 @@ class App extends Component {
 
   // Call for a random dog breed
   fetchDogs(){
+    this.resetGame();    
     fetch('https://dog.ceo/api/breeds/list')
       .then(response => response.json())
       .then(breed => this.setDogBreed(breed.message))
       .then(imageUrl => this.fetchDogImage(this.state.breed))
       .catch(e => e);
+      
     }
 
   componentDidMount() {
@@ -57,10 +66,7 @@ class App extends Component {
 
   onSubmit(event) {
     let result = (this.state.proposal === this.state.breed ? 'U got it' : 'No this doggo is a ' + this.state.breed + ' nice try though');
-    this.setState({ 
-      result:   result,
-      clue: ""
-    });
+    this.setState({ result: result});
     event.preventDefault();
 
     setTimeout(() => this.fetchDogs(), 1000);
