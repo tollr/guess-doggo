@@ -5,7 +5,7 @@ const DEFAULT_QUERY = 'borzoi';
 const PATH_BASE = 'https://dog.ceo/api/';
 const PATH_SEARCH = 'breed/';
 
-const all_breed = 'breeds/list/all';
+// const all_breed = 'breeds/list/all';
 const PATH_END = '/images/random';
 
 const url = `${PATH_BASE}${PATH_SEARCH}${DEFAULT_QUERY}${PATH_END}`;
@@ -19,18 +19,21 @@ class App extends Component {
       breed: DEFAULT_QUERY,
       proposal: '', 
       result: '',
+      clue:'',
     };
 
     this.fetchDogImage = this.fetchDogImage.bind(this); 
     this.fetchDogs = this.fetchDogs.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.onProposalChange = this.onProposalChange.bind(this);    
+    this.getClue = this.getClue.bind(this);    
   }
 
   setDogBreed(result){
     this.setState({ breed: result[Math.floor((Math.random() * result.length) + 1)] });  
   }
 
+  // get random image from the breed
   fetchDogImage(breed) {
     fetch('https://dog.ceo/api/breed/'+ breed +'/images/random')
       .then(response => response.json())
@@ -39,6 +42,7 @@ class App extends Component {
       })
   }  
 
+  // Call for a random dog breed
   fetchDogs(){
     fetch('https://dog.ceo/api/breeds/list')
       .then(response => response.json())
@@ -53,18 +57,26 @@ class App extends Component {
 
   onSubmit(event) {
     let result = (this.state.proposal === this.state.breed ? 'U got it' : 'No this doggo is a ' + this.state.breed + ' nice try though');
-    this.setState({ result: result});
+    this.setState({ 
+      result:   result,
+      clue: ""
+    });
     event.preventDefault();
 
-    setTimeout(function(){ window.location.reload(); }, 1000);
+    setTimeout(() => this.fetchDogs(), 1000);
   }
 
   onProposalChange(event) {
     this.setState({ proposal: event.target.value });
   }
 
+  getClue(event){
+    let obfsRace = this.state.breed.replace(/[aeiou]/gi, "*" );
+    this.setState({clue: obfsRace})
+  }
+
   render() {
-    const { breed, imageUrl, result } = this.state;
+    const { breed, imageUrl, result, clue } = this.state;
     return (
       <div className="page">
         <div className="interactions">
@@ -78,8 +90,13 @@ class App extends Component {
             onSubmit={this.onSubmit}
             onChange={this.onProposalChange}
           >
-            Search  
+            Submit  
           </Submit>
+          <Clue 
+            onClick={this.getClue}
+            clue={clue }
+          >
+          </Clue>
         </div>
       </div>
     );
@@ -102,6 +119,14 @@ const Submit = ({
       {children}
     </button>
 </form>
+
+const Clue = ({onClick, className, children, clue}) =>
+  <div> 
+    <label className="clue-target">{clue}</label>
+    <button onClick={onClick} className={className} type="button">
+      Help !
+    </button>
+  </div>
 
 const Button = ({onClick, className = '', children}) =>
   <button

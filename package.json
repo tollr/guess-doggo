@@ -2,6 +2,7 @@
   "name": "dog_quizz",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://sandbox.thibaultollivier.fr/guess-doggos/",
   "dependencies": {
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
