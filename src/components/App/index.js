@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import {GuessForm} from '../GuessForm/';
+import {Clue} from '../Clue/';
 
 const DEFAULT_QUERY = 'borzoi';
 const PATH_BASE = 'https://dog.ceo/api/';
@@ -52,7 +53,6 @@ class App extends Component {
   // Call for a random dog breed
   fetchDogs(){
     this.resetGame();   
-    console.log(this.state) 
     fetch('https://dog.ceo/api/breeds/list')
       .then(response => response.json())
       .then(breed => this.setDogBreed(breed.message))
@@ -64,17 +64,17 @@ class App extends Component {
     this.fetchDogs();
   }
 
-  onSubmit(event) {
-    let result = (this.state.proposal === this.state.breed ? 
-      'U got it' : 
-      'No this doggo is a ' + this.state.breed + ' nice try though'
+  onSubmit(proposal) {
+    let result = (proposal === this.state.breed ? 
+      'U got it' 
+      : 'No this doggo is a ' + this.state.breed + ' nice try though'
     );
 
     this.setState({ result: result});
 
     setTimeout(() => {
       this.fetchDogs();
-    }, 1000);
+    }, 3000);
   }
 
   getClue(event){
@@ -108,21 +108,5 @@ class App extends Component {
     );
   }
 }
-
-const Clue = ({onClick, className, children, clue}) =>
-  <div> 
-    <label className="clue-target">{clue}</label>
-    <button onClick={onClick} className={className} type="button">
-      Help !
-    </button>
-  </div>
-
-const Button = ({onClick, className = '', children}) =>
-  <button
-    onClick={onClick}
-    className={className}
-    type="button"
-  >
-  </button>
 
 export default App;
