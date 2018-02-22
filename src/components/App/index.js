@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import {GuessForm} from '../GuessForm/';
 
 const DEFAULT_QUERY = 'borzoi';
 const PATH_BASE = 'https://dog.ceo/api/';
@@ -28,7 +29,6 @@ class App extends Component {
     this.fetchDogImage = this.fetchDogImage.bind(this); 
     this.fetchDogs = this.fetchDogs.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.onProposalChange = this.onProposalChange.bind(this);    
     this.getClue = this.getClue.bind(this);    
   }
 
@@ -51,13 +51,13 @@ class App extends Component {
 
   // Call for a random dog breed
   fetchDogs(){
-    this.resetGame();    
+    this.resetGame();   
+    console.log(this.state) 
     fetch('https://dog.ceo/api/breeds/list')
       .then(response => response.json())
       .then(breed => this.setDogBreed(breed.message))
       .then(imageUrl => this.fetchDogImage(this.state.breed))
       .catch(e => e);
-      
     }
 
   componentDidMount() {
@@ -65,15 +65,16 @@ class App extends Component {
   }
 
   onSubmit(event) {
-    let result = (this.state.proposal === this.state.breed ? 'U got it' : 'No this doggo is a ' + this.state.breed + ' nice try though');
+    let result = (this.state.proposal === this.state.breed ? 
+      'U got it' : 
+      'No this doggo is a ' + this.state.breed + ' nice try though'
+    );
+
     this.setState({ result: result});
-    event.preventDefault();
 
-    setTimeout(() => this.fetchDogs(), 1000);
-  }
-
-  onProposalChange(event) {
-    this.setState({ proposal: event.target.value });
+    setTimeout(() => {
+      this.fetchDogs();
+    }, 1000);
   }
 
   getClue(event){
@@ -82,7 +83,7 @@ class App extends Component {
   }
 
   render() {
-    const { breed, imageUrl, result, clue } = this.state;
+    const { breed, imageUrl, result, clue } = this.state
     return (
       <div className="page">
         <div className="interactions">
@@ -91,16 +92,15 @@ class App extends Component {
 
           { result && <h2>{result}</h2> }
 
-          <Submit 
-            value="What's this good doggo's breed ?"
+          <GuessForm
+            placeholder="What's this good doggo's breed ?"
             onSubmit={this.onSubmit}
-            onChange={this.onProposalChange}
-          >
-            Submit  
-          </Submit>
+            label="Submit"
+            key={breed}
+          />
           <Clue 
             onClick={this.getClue}
-            clue={clue }
+            clue={clue}
           >
           </Clue>
         </div>
@@ -108,23 +108,6 @@ class App extends Component {
     );
   }
 }
-
-const Submit = ({
-  value,
-  onChange,
-  onSubmit,
-  children
-}) =>
-  <form onSubmit={onSubmit}>
-    <input
-      type="text"
-      placeholder={value}
-      onChange={onChange}
-    />
-    <button type="submit">
-      {children}
-    </button>
-</form>
 
 const Clue = ({onClick, className, children, clue}) =>
   <div> 
